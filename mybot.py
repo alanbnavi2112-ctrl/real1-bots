@@ -18,7 +18,7 @@ TOKEN = os.environ.get('TOKEN')
 
 # ئەگەر ل سەر کۆمپیوتەری بی و TOKEN نەبوو، ڤێ تۆکنێ ب کار دئینیت
 if not TOKEN:
-    TOKEN = 'MTQ4NTc0Mzk2OTMxNTg0ODIzOQ.GZ9Q33.KKDn7fIkHkE5IWLK3AjmkWqm7ERh19YXW_Wic8'
+    TOKEN = 'MTQ4NTc0Mzk2OTMxNTg0ODIzOQ.Gfqxh5.SEYdqYl1rKTZ4Xa3RKmLBjx1Kl88jivpjVleE4'
 
 intents = discord.Intents.default()
 intents.message_content = True 
@@ -161,28 +161,28 @@ async def hello(ctx):
 
 # 2. Kick ban unban Command
 # --- ١. کوماندا Ban ب ڕێکا ID یان Mention ---
+
 @bot.command()
 @commands.has_permissions(ban_members=True)
-async def ban(ctx, user: discord.User, *, reason="hiii"):
+async def ban(ctx, user: discord.User, *, reason=None): # مە کرە None
     try:
         await ctx.message.delete()
         
-        # ١. پشکنین کا ئایا ئەڤ کەسە بەری نوکە یێ باندکرییە یان نە
+        # ئەگەر تە چ نەنڤیسیبوو، دێ بێژیت "دیار نەکرییە"
+        if reason is None:
+            reason = "چ هوکار نەتاتینە دیارکرن"
+
+        # پشکنینا باندی (وەک مە بەری نوکە چێکری)
         is_banned = False
-        async for entry in ctx.guild.bans():
+        async for entry in ctx.guild.bans(limit=1000):
             if entry.user.id == user.id:
                 is_banned = True
                 break
         
         if is_banned:
-            already_banned_embed = discord.Embed(
-                title="⚠️ ئاگاداری",
-                description=f"{user.mention} بەری نوکە یێ هاتییە باندکرن! نکارم جارەکا دی باند بکەم.",
-                color=0xf1c40f # ڕەنگێ زەرد
-            )
-            return await ctx.send(embed=already_banned_embed)
+            already_embed = discord.Embed(title="⚠️ ئاگاداری", description=f"{user.mention} بەری نوکە یێ باندکرییە!", color=0xf1c40f)
+            return await ctx.send(embed=already_embed)
 
-        # ٢. ئەگەر یێ باندکری نەبوو، باند بکە
         await ctx.guild.ban(user, reason=reason)
 
         embed = discord.Embed(title="⛔ ئەندام هاتە باندکرن", color=0xff0000, timestamp=datetime.datetime.now())
@@ -193,11 +193,7 @@ async def ban(ctx, user: discord.User, *, reason="hiii"):
         await ctx.send(embed=embed)
 
     except Exception as e:
-        error_embed = discord.Embed(
-            title="❌ خەلەتی د باندکرنێ دا",
-            description=f"نەشێم {user.mention} باند بکەم.\n**ئەڕۆڕ:** `{str(e)}`",
-            color=0xff0000
-        )
+        error_embed = discord.Embed(title="❌ خەلەتی", description=f"نکارم باند بکەم.\n**هوکار:** `{str(e)}`", color=0xff0000)
         await ctx.send(embed=error_embed)
 
 # --- ٢. کوماندا Kick ب ڕێکا ID یان Mention ---
