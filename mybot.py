@@ -18,7 +18,7 @@ TOKEN = os.environ.get('TOKEN')
 
 # ئەگەر ل سەر کۆمپیوتەری بی و TOKEN نەبوو، ڤێ تۆکنێ ب کار دئینیت
 if not TOKEN:
-    TOKEN = 'MTQ4NTc0Mzk2OTMxNTg0ODIzOQ.GF5Cfy.SH0VY8cDIOUgWjNAr58GVtEcpYG3lm8t49yyy0'
+    TOKEN = ''
 
 intents = discord.Intents.default()
 intents.message_content = True 
@@ -197,13 +197,17 @@ async def kick(ctx, user: discord.User, *, reason="hiii"):
         await ctx.send(f"❌ کێشەیەک چێبوو: {e}", delete_after=5)
 
 # --- ٣. کوماندا Unban ب ڕێکا ID ---
-# --- کوماندا Unban دگەل ئیمبێدا خەلەتیێ کو دمینیت ---
 @bot.command()
 @commands.has_permissions(ban_members=True)
-async def unban(ctx, user_id: int):
+async def unban(ctx, user_id: str): # مە کرە سترینگ دا ئەڕۆڕا ئایدی نەمینیت
     try:
+        # ١. سڕینا نامەیا کوماندا تە
         await ctx.message.delete()
-        user = await bot.fetch_user(user_id)
+
+        # ٢. پەیداکرنا بەکارهێنەری
+        user = await bot.fetch_user(int(user_id))
+        
+        # ٣. لادانا باندی
         await ctx.guild.unban(user)
 
         # ئیمبێدا سەرکەفتنێ
@@ -215,36 +219,14 @@ async def unban(ctx, user_id: int):
         embed.add_field(name="👤 کەسێ ئازادبووی:", value=f"{user.mention} (`{user.id}`)", inline=False)
         embed.add_field(name="👮 ژ لایێ ئەدمین:", value=f"{ctx.author.mention}", inline=False)
         embed.set_thumbnail(url=user.display_avatar.url)
+        
         await ctx.send(embed=embed)
 
-    except Exception:
-        # ئیمبێدا خەلەتیێ (ئەڤە دێ مینیت و ژێنەچیت)
+    except Exception as e:
+        # ئیمبێدا خەلەتیێ (دێ مینیت)
         error_embed = discord.Embed(
             title="❌ کێشەیەک چێبوو د Unban دا",
-            description=f"چ ئەندام ب ڤێ ئایدیێ `{user_id}` نەهاتنە دیتن یان یێ باندکری نینە.\nتکایە ل ئایدیێ بکۆڵەڤە.",
-            color=0xff0000
-        )
-        await ctx.send(embed=error_embed)
-
-# --- کوماندا Ban دگەل ئیمبێدا خەلەتیێ کو دمینیت ---
-@bot.command()
-@commands.has_permissions(ban_members=True)
-async def ban(ctx, user: discord.User, *, reason="hiii"):
-    try:
-        await ctx.message.delete()
-        await ctx.guild.ban(user, reason=reason)
-
-        embed = discord.Embed(title="⛔ ئەندام هاتە باندکرن", color=0xff0000, timestamp=datetime.datetime.now())
-        embed.add_field(name="👤 کەسێ باندبووی:", value=f"{user.mention} (`{user.id}`)", inline=False)
-        embed.add_field(name="📝 هوکار:", value=f"`{reason}`", inline=False)
-        embed.add_field(name="👮 ژ لایێ ئەدمین:", value=f"{ctx.author.mention}", inline=False)
-        embed.set_thumbnail(url=user.display_avatar.url)
-        await ctx.send(embed=embed)
-
-    except Exception:
-        error_embed = discord.Embed(
-            title="❌ خەلەتی د باندکرنێ دا",
-            description=f"نەشێم {user.mention} باند بکەم.\n**ئەگەر:** ڕەنگە ڕۆڵێ وی ژ یێ پۆتی بلندتر بیت یان مۆڵەتا پۆتی نینە.",
+            description=f"ئەو ئایدییا تە دایە `{user_id}` نەهاتە دیتن یان یێ باندکری نینە.\n\n**ئەڕۆڕ:** `{str(e)}`",
             color=0xff0000
         )
         await ctx.send(embed=error_embed)
