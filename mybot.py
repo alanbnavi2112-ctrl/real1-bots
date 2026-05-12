@@ -18,7 +18,7 @@ TOKEN = os.environ.get('TOKEN')
 
 # ئەگەر ل سەر کۆمپیوتەری بی و TOKEN نەبوو، ڤێ تۆکنێ ب کار دئینیت
 if not TOKEN:
-    TOKEN = 'MTQ4NTc0Mzk2OTMxNTg0ODIzOQ.GoTrqA.WFEo3JOeyUz9sJ-DzOOMUR6gFCUv6j306Pj8gU'
+    TOKEN = 'MTQ4NTc0Mzk2OTMxNTg0ODIzOQ.GF5Cfy.SH0VY8cDIOUgWjNAr58GVtEcpYG3lm8t49yyy0'
 
 intents = discord.Intents.default()
 intents.message_content = True 
@@ -159,38 +159,95 @@ async def setup_ticket(ctx):
 async def hello(ctx):
     await ctx.send('Hello! I am REALONES bot. I am online 24/7 now!')
 
-# 2. Kick Command
-@bot.command()
-@commands.has_permissions(kick_members=True)
-async def kick(ctx, user: discord.User, *, reason="No reason"):
-    try:
-        member = await ctx.guild.fetch_member(user.id)
-        await member.kick(reason=reason)
-        await ctx.send(f"✅ {user.mention} has been kicked. Reason: {reason}")
-    except discord.NotFound:
-        await ctx.send("❌ ئەڤ کەسە د ناڤ سیرڤەری دا نینە.")
-    except Exception as e:
-        await ctx.send(f"❌ Error: {e}")
-
-# 3. Ban Command
+# 2. Kick ban Command
+# --- ١. کوماندا Ban ب ڕێکا ID یان Mention ---
 @bot.command()
 @commands.has_permissions(ban_members=True)
-async def ban(ctx, user: discord.User, *, reason="No reason"):
+async def ban(ctx, user: discord.User, *, reason="hiii"):
     try:
+        await ctx.message.delete()
         await ctx.guild.ban(user, reason=reason)
-        await ctx.send(f"🚫 {user.mention} has been banned. Reason: {reason}")
+
+        embed = discord.Embed(title="⛔ ئەندام هاتە باندکرن", color=0xff0000, timestamp=datetime.datetime.now())
+        embed.add_field(name="👤 کەسێ باندبووی:", value=f"{user.mention} (`{user.id}`)", inline=False)
+        embed.add_field(name="📝 هوکار:", value=f"`{reason}`", inline=False)
+        embed.add_field(name="👮 ژ لایێ ئەدمین:", value=f"{ctx.author.mention}", inline=False) # دێ چیتە بن هوکاری
+        embed.set_thumbnail(url=user.display_avatar.url)
+        
+        await ctx.send(embed=embed)
     except Exception as e:
-        await ctx.send(f"❌ Error: {e}")
-# 4.unban Command
+        await ctx.send(f"❌ کێشەیەک چێبوو: {e}", delete_after=5)
+
+# --- ٢. کوماندا Kick ب ڕێکا ID یان Mention ---
+@bot.command()
+@commands.has_permissions(kick_members=True)
+async def kick(ctx, user: discord.User, *, reason="hiii"):
+    try:
+        await ctx.message.delete()
+        await ctx.guild.kick(user, reason=reason)
+
+        embed = discord.Embed(title="👢 ئەندام هاتە دەرخستن", color=0xf1c40f, timestamp=datetime.datetime.now())
+        embed.add_field(name="👤 کەسێ دەرکەفتی:", value=f"{user.mention} (`{user.id}`)", inline=False)
+        embed.add_field(name="📝 هوکار:", value=f"`{reason}`", inline=False)
+        embed.add_field(name="👮 ژ لایێ ئەدمین:", value=f"{ctx.author.mention}", inline=False) # دێ چیتە بن هوکاری
+        embed.set_thumbnail(url=user.display_avatar.url)
+        
+        await ctx.send(embed=embed)
+    except Exception as e:
+        await ctx.send(f"❌ کێشەیەک چێبوو: {e}", delete_after=5)
+
+# --- ٣. کوماندا Unban ب ڕێکا ID ---
+# --- کوماندا Unban دگەل ئیمبێدا خەلەتیێ کو دمینیت ---
 @bot.command()
 @commands.has_permissions(ban_members=True)
 async def unban(ctx, user_id: int):
     try:
+        await ctx.message.delete()
         user = await bot.fetch_user(user_id)
         await ctx.guild.unban(user)
-        await ctx.send(f"✅ User {user.mention} has been unbanned successfully.")
+
+        # ئیمبێدا سەرکەفتنێ
+        embed = discord.Embed(
+            title="✅ ئەندام هاتە ئازادکرن",
+            color=0x2ecc71,
+            timestamp=datetime.datetime.now()
+        )
+        embed.add_field(name="👤 کەسێ ئازادبووی:", value=f"{user.mention} (`{user.id}`)", inline=False)
+        embed.add_field(name="👮 ژ لایێ ئەدمین:", value=f"{ctx.author.mention}", inline=False)
+        embed.set_thumbnail(url=user.display_avatar.url)
+        await ctx.send(embed=embed)
+
     except Exception:
-        await ctx.send("❌ Invalid ID or user is not banned.")
+        # ئیمبێدا خەلەتیێ (ئەڤە دێ مینیت و ژێنەچیت)
+        error_embed = discord.Embed(
+            title="❌ کێشەیەک چێبوو د Unban دا",
+            description=f"چ ئەندام ب ڤێ ئایدیێ `{user_id}` نەهاتنە دیتن یان یێ باندکری نینە.\nتکایە ل ئایدیێ بکۆڵەڤە.",
+            color=0xff0000
+        )
+        await ctx.send(embed=error_embed)
+
+# --- کوماندا Ban دگەل ئیمبێدا خەلەتیێ کو دمینیت ---
+@bot.command()
+@commands.has_permissions(ban_members=True)
+async def ban(ctx, user: discord.User, *, reason="hiii"):
+    try:
+        await ctx.message.delete()
+        await ctx.guild.ban(user, reason=reason)
+
+        embed = discord.Embed(title="⛔ ئەندام هاتە باندکرن", color=0xff0000, timestamp=datetime.datetime.now())
+        embed.add_field(name="👤 کەسێ باندبووی:", value=f"{user.mention} (`{user.id}`)", inline=False)
+        embed.add_field(name="📝 هوکار:", value=f"`{reason}`", inline=False)
+        embed.add_field(name="👮 ژ لایێ ئەدمین:", value=f"{ctx.author.mention}", inline=False)
+        embed.set_thumbnail(url=user.display_avatar.url)
+        await ctx.send(embed=embed)
+
+    except Exception:
+        error_embed = discord.Embed(
+            title="❌ خەلەتی د باندکرنێ دا",
+            description=f"نەشێم {user.mention} باند بکەم.\n**ئەگەر:** ڕەنگە ڕۆڵێ وی ژ یێ پۆتی بلندتر بیت یان مۆڵەتا پۆتی نینە.",
+            color=0xff0000
+        )
+        await ctx.send(embed=error_embed)
 
 # 5. Clear Command
 @bot.command()
