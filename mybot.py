@@ -18,7 +18,7 @@ TOKEN = os.environ.get('TOKEN')
 
 # ئەگەر ل سەر کۆمپیوتەری بی و TOKEN نەبوو، ڤێ تۆکنێ ب کار دئینیت
 if not TOKEN:
-    TOKEN = ''
+    TOKEN = 'MTQ4NTc0Mzk2OTMxNTg0ODIzOQ.GT1z0P.czurMrhJKVZRIE9H57TbqWOtFpFQ-XMMIUoJSo'
 
 intents = discord.Intents.default()
 intents.message_content = True 
